@@ -1,0 +1,17 @@
+{
+  "time": {
+    "type": "int",
+    "description": "指令冷却时间（单位：秒）",
+    "default": 30
+  },
+  "timeout": {
+    "type": "int",
+    "description": "超时时长（单位：秒）",
+    "default": 15
+  },
+  "admin": {
+    "type": "bool",
+    "description": "管理员是否不受冷却影响",
+    "default": true
+  }
+}
