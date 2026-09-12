@@ -5,4 +5,6 @@ version: v1.0.2 # 插件版本号。格式：v1.1.1 或者 v1.1
 author: aipiao_ # 作者
 repo: https://github.com/aipiao-gh/astrbot_plugin_nlrmeme # 插件的仓库地址
 support_platforms:
-  - qq
+  - aiocqhttp
+  - qq_official
+  - qq_official_webhook
