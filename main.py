@@ -65,12 +65,13 @@ class MyPlugin(Star):
                     )
                     response.raise_for_status()
                     json = response.json()
+                    logger.info(json)
                     data_type = json["data"]["type"]
                     if data_type == 'image':
                         img = json["data"]["content"]
                         yield event.image_result(img)
-                    elif data_type == 'text':
-                        text = json["data"]["text"]
+                    elif data_type == 'content':
+                        text = json["data"]["content"]
                         yield event.plain_result(text)
                     else:
                         yield event.plain_result('未知错误！请查看日志！')
