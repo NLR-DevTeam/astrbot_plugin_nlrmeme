@@ -11,7 +11,7 @@ import astrbot.api.message_components as Comp
 plugin_dir = Path(__file__).parent
 error_img = str(plugin_dir / "resource" / "error_img.jpg")
 
-@register("nlrmeme", "aipiao_", "调用 NLR MEME/梗图插件", "1.0.0")
+@register("nlrmeme", "aipiao_", "调用 NLR MEME/梗图插件", "1.0.2")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
@@ -70,12 +70,12 @@ class MyPlugin(Star):
                     if data_type == 'image':
                         img = json["data"]["content"]
                         yield event.image_result(img)
-                    elif data_type == 'content':
+                    elif data_type == 'text':
                         text = json["data"]["content"]
                         yield event.plain_result(text)
                     else:
                         yield event.plain_result('未知错误！请查看日志！')
-                        raise ValueError("未知错误")
+                        raise ValueError(f"未知错误 {data_type!r}")
                 else:
                     yield event.plain_result(f'冷却中！请等待 {math.ceil(remain)} 秒')
             except ValueError as e:
