@@ -75,11 +75,8 @@ class MyPlugin(Star):
                         yield event.plain_result(text)
                     else:
                         yield event.plain_result('未知错误！请查看日志！')
-                        raise ValueError(f"未知错误 {data_type!r}")
                 else:
                     yield event.plain_result(f'冷却中！请等待 {math.ceil(remain)} 秒')
-            except ValueError as e:
-                logger.error(e)
             except Exception as e:
                 logger.error(e)
                 chain = [
