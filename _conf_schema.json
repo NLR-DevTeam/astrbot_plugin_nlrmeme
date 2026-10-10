@@ -1,4 +1,10 @@
 {
+  "key": {
+    "type": "string",
+    "description": "API Key",
+    "default": "",
+    "secret": true
+  },
   "time": {
     "type": "int",
     "description": "指令冷却时间（单位：秒）",
