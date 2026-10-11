@@ -129,17 +129,33 @@ class NLRMeme(Star):
                 ]
                 yield event.chain_result(chain)
 
+    def _get_upload_images(self, event: AstrMessageEvent) -> list[Comp.Image]:
+        messages = event.get_messages()
+        # 当前消息附图优先；没有附图时才使用被回复消息中的图片。
+        images = [item for item in messages if isinstance(item, Comp.Image)]
+        if images:
+            return images
+        for item in messages:
+            if isinstance(item, Comp.Reply):
+                images = [
+                    component for component in (item.chain or [])
+                    if isinstance(component, Comp.Image)
+                ]
+                if images:
+                    return images
+        return []
+
     @filter.permission_type(filter.PermissionType.ADMIN)
     @filter.command("upload", alias={"meme投稿", "投稿"})
     async def upload_meme(self, event: AstrMessageEvent):
-        """仅接受图片；未附图时等待同一用户在 30 秒内发送图片。"""
+        """接受附图或回复图片；未找到图片时等待同一用户 30 秒。"""
         session_filter = UploadSessionFilter()
         session_id = session_filter.filter(event)
         if session_id in self._upload_tasks:
             yield event.plain_result("你已有一个等待中的投稿，请发送图片")
             return
 
-        images = [item for item in event.get_messages() if isinstance(item, Comp.Image)]
+        images = self._get_upload_images(event)
         if images:
             yield self._upload_result(event, await self._submit_meme_image(event, images[0]))
             return
@@ -153,11 +169,9 @@ class NLRMeme(Star):
             if time.monotonic() >= deadline:
                 controller.stop(TimeoutError("等待图片超时"))
                 return
-            next_images = [
-                item for item in next_event.get_messages() if isinstance(item, Comp.Image)
-            ]
+            next_images = self._get_upload_images(next_event)
             if not next_images:
-                await next_event.send(next_event.plain_result("只接受图片投稿，请在剩余时间内发送图片。"))
+                await next_event.send(next_event.plain_result("只接受图片投稿，请在剩余时间内发送图片或回复一张图片。"))
                 # 不重置计时：始终从最初的 upload 指令起计算 30 秒。
                 return
             received_image = next_images[0]
@@ -173,7 +187,7 @@ class NLRMeme(Star):
         task = asyncio.create_task(wait_for_image_session(event, session_filter))
         self._upload_tasks[session_id] = task
         try:
-            yield event.plain_result("请在 30 秒内发送要投稿的图片")
+            yield event.plain_result("请在 30 秒内发送要投稿的图片，或回复一张图片。")
             await task
             if received_image is not None and received_event is not None:
                 yield self._upload_result(event, await self._submit_meme_image(received_event, received_image))
